@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music Search App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎵 Music Finder</h1>
+
+    <div class="search-box">
+      <input type="text" id="songInput" placeholder="Search for a song...">
+      <button onclick="searchSong()">Search</button>
+    </div>
+
+    <select id="sortOption">
+      <option value="default">Sort: Default</option>
+      <option value="az">Sort: A-Z</option>
+    </select>
+
+    <p id="loading">Loading...</p>
+
+    <div id="results"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
