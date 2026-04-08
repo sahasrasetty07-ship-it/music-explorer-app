@@ -1,101 +1,77 @@
 const API_KEY = "29c0ddf5377631927fb5468e6bcb82f6";
 
-async function searchSong() {
+async function searchSongs() {
   const query = document.getElementById("songInput").value;
   const resultsDiv = document.getElementById("results");
   const loading = document.getElementById("loading");
-  const sortOption = document.getElementById("sortOption").value;
 
-  loading.style.display = "block";
+  if (!query) return;
+
   resultsDiv.innerHTML = "";
+  loading.style.display = "block";
 
   try {
-    const response = await fetch(
+    const res = await fetch(
       `https://ws.audioscrobbler.com/2.0/?method=track.search&track=${query}&api_key=${API_KEY}&format=json`
     );
 
-    const data = await response.json();
-    loading.style.display = "none";
+    const data = await res.json();
+    const tracks = data.results.trackmatches.track;
 
-    let tracks = data.results.trackmatches.track;
+    loading.style.display = "none";
 
     if (!tracks || tracks.length === 0) {
       resultsDiv.innerHTML = "No songs found 😢";
       return;
     }
 
-    // SORTING
-    if (sortOption === "az") {
-      tracks.sort((a, b) => a.name.localeCompare(b.name));
-    }
+    tracks.slice(0, 10).forEach(track => {
+      const card = document.createElement("div");
+      card.className = "card";
 
-    // REMOVE DUPLICATES
-    const unique = [];
-    tracks.forEach(song => {
-      if (!unique.find(s => s.artist === song.artist)) {
-        unique.push(song);
-      }
-    });
+      const uniqueId = Math.random().toString(36).substring(7);
 
-    // DISPLAY SEARCH RESULTS
-    resultsDiv.innerHTML += `<div class="section-title">Search Results 🎵</div>`;
-
-    unique.slice(0, 5).forEach(song => {
-      resultsDiv.innerHTML += `
-        <div class="card">
-          <img src="${song.image[2]['#text']}" />
-          <h3>${song.name}</h3>
-          <p>Artist: ${song.artist}</p>
+      card.innerHTML = `
+        <div class="title">${track.name}</div>
+        <div class="artist">${track.artist}</div>
+        <div class="similar" id="sim-${uniqueId}">
+          Finding similar songs...
         </div>
       `;
+
+      resultsDiv.appendChild(card);
+
+      getSimilar(track.artist, track.name, uniqueId);
     });
 
-    // CALL SIMILAR SONGS
-    const firstSong = unique[0];
-    getSimilarSongs(firstSong.artist, firstSong.name);
-
-  } catch (error) {
+  } catch (err) {
     loading.style.display = "none";
-    resultsDiv.innerHTML = "Error fetching data ❌";
-    console.error(error);
+    resultsDiv.innerHTML = "Error fetching songs";
+    console.error(err);
   }
 }
 
-// SIMILAR SONGS FUNCTION
-async function getSimilarSongs(artist, track) {
-  const resultsDiv = document.getElementById("results");
-
+async function getSimilar(artist, track, id) {
   try {
-    const response = await fetch(
+    const res = await fetch(
       `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${artist}&track=${track}&api_key=${API_KEY}&format=json`
     );
 
-    const data = await response.json();
+    const data = await res.json();
+    const similar = data.similartracks.track;
 
-    const similarTracks = data.similartracks.track;
+    const el = document.getElementById(`sim-${id}`);
 
-    if (!similarTracks || similarTracks.length === 0) return;
+    if (!similar || similar.length === 0) {
+      el.innerHTML = "No similar songs";
+      return;
+    }
 
-    resultsDiv.innerHTML += `<div class="section-title">Recommended Songs 🎧</div>`;
+    const names = similar.slice(0, 3).map(s => s.name).join(", ");
+    el.innerHTML = `🎵 ${names}`;
 
-    similarTracks.slice(0, 5).forEach(song => {
-      resultsDiv.innerHTML += `
-        <div class="card">
-          <img src="${song.image[2]['#text']}" />
-          <h3>${song.name}</h3>
-          <p>Artist: ${song.artist.name}</p>
-        </div>
-      `;
-    });
-
-  } catch (error) {
-    console.log("Error fetching similar songs");
+  } catch {
+    const el = document.getElementById(`sim-${id}`);
+    if (el) el.innerHTML = "No data";
   }
 }
-
-// ENTER KEY SUPPORT
-document.getElementById("songInput").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    searchSong();
-  }
-});
