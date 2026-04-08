@@ -2,27 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Music Search App</title>
+  <title>Music Finder</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="container">
-    <h1>🎵 Music Finder</h1>
+
+    <h1>Music Finder</h1>
+    <p class="subtitle">Discover songs, artists & vibes</p>
 
     <div class="search-box">
-      <input type="text" id="songInput" placeholder="Search for a song...">
-      <button onclick="searchSong()">Search</button>
+      <input type="text" id="songInput" placeholder="Search any song...">
+      <button onclick="searchSongs()">Search</button>
     </div>
 
-    <select id="sortOption">
-      <option value="default">Sort: Default</option>
-      <option value="az">Sort: A-Z</option>
-    </select>
-
-    <p id="loading">Loading...</p>
+    <div id="loading">Searching...</div>
 
     <div id="results"></div>
+
   </div>
 
   <script src="script.js"></script>
